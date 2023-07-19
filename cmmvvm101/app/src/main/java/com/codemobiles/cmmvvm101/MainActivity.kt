@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.codemobiles.cmmvvm101.databinding.ActivityMainBinding
 import com.codemobiles.cmmvvm101.viewmodel.AppViewModelFactory
 import com.codemobiles.cmmvvm101.viewmodel.MainViewModel
+import kotlinx.coroutines.launch
 
 //  V--MV--M
 class MainActivity : AppCompatActivity() {
@@ -21,15 +23,22 @@ class MainActivity : AppCompatActivity() {
         val factory = AppViewModelFactory(context = applicationContext)
         viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
 
-
         binding.countBtn.text = "Count ${viewModel.count.value}"
         setUIEvent()
+        observe()
+    }
+
+    private fun observe() {
+        lifecycleScope.launch {
+            viewModel.count.collect{
+                binding.countBtn.text = "Count ${it}"
+            }
+        }
     }
 
     private fun setUIEvent() {
         binding.countBtn.setOnClickListener {
-            viewModel.count.value = viewModel.count.value + 1
-            binding.countBtn.text = "Count ${viewModel.count.value}"
+            viewModel.add()
         }
     }
 }
